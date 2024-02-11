@@ -1,5 +1,10 @@
-#Program 1- Designing Client-server application with TCP and UDP using C
+# Networks Programming Laboratory CSLR
 
-project1.1- Design Client server application with TCP
-project1.2- Design Client server application with UDP
+### Course Details
 
+Course- Networks Programming Laboratory
+Code- CSLR31
+
+### Contents
+
+-   lab1: Design client server application using TCP and UDP in C
