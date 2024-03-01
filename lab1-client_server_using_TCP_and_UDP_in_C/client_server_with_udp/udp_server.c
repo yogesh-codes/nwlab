@@ -1,55 +1,58 @@
-#include <stdio.h>     
-#include <stdlib.h>     
-#include <string.h>     // for memset
-#include <sys/socket.h> 
-#include <netinet/in.h> // For struct sockaddr_in and INADDR_ANY
-#include <arpa/inet.h>  // For inet_addr function
-#include <unistd.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
-#define PORT 8080
+#define BUF_SIZE 1024
+#define PORT 8888
 
+int main() {
+    int serverSocket;
+    struct sockaddr_in serverAddr, clientAddr;
+    char buffer[BUF_SIZE];
+    socklen_t clientAddrSize;
 
-int sockfd;
-struct sockaddr_in servaddr, cliaddr;
-
-
-int main()
-{
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-    perror("socket creation failed");
-    exit(EXIT_FAILURE);
+    // Create socket
+    serverSocket = socket(PF_INET, SOCK_DGRAM, 0);
+    if (serverSocket == -1) {
+        perror("socket creation failed");
+        exit(EXIT_FAILURE);
     }
 
-    memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
+    // Configure server address
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serverAddr.sin_port = htons(PORT);
 
-    // Fill server information
-    servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;
-    servaddr.sin_port = htons(PORT); // Port number
-
-    // Bind the socket with the server address
-    if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+    // Bind socket to the server address
+    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
 
-    // Receive messages from client
-    int len, n;
-    len = sizeof(cliaddr); //len is value/resuslt
-    n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &cliaddr, &len);
-    buffer[n] = '\0';
-    printf("Client : %s\n", buffer);
+    while (1) {
+        printf("Waiting for messages...\n");
 
-    // Send acknowledgement to client
-    sendto(sockfd, (const char *)message, strlen(message), MSG_CONFIRM, (const struct sockaddr *) &cliaddr, len);
+        clientAddrSize = sizeof(clientAddr);
+        // Receive message from client
+        if (recvfrom(serverSocket, buffer, BUF_SIZE, 0, (struct sockaddr*)&clientAddr, &clientAddrSize) == -1) {
+            perror("recvfrom failed");
+            break;
+        }
 
-    // Close the socket
-    close(sockfd);
+        printf("Received message: %s\n", buffer);
 
+        // Send response back to client
+        if (sendto(serverSocket, buffer, strlen(buffer), 0, (struct sockaddr*)&clientAddr, clientAddrSize) == -1) {
+            perror("sendto failed");
+            break;
+        }
+    }
 
+    // Close socket
+    close(serverSocket);
     return 0;
-
 }
-
-main();

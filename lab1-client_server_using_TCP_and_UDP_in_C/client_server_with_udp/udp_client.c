@@ -1,45 +1,53 @@
-#include <stdio.h>     
-#include <stdlib.h>     
-#include <string.h>     // for memset
-#include <sys/socket.h> 
-#include <netinet/in.h> // For struct sockaddr_in and INADDR_ANY
-#include <arpa/inet.h>  // For inet_addr function
-#include <unistd.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
-#define PORT 8080
+#define BUF_SIZE 1024
+#define SERVER_IP "127.0.0.1"
+#define PORT 8888
 
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    char buffer[BUF_SIZE];
 
-int sockfd;
-struct sockaddr_in servaddr;
-
-
-// Create socket
-void client()
-
-{
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    // Create socket
+    clientSocket = socket(PF_INET, SOCK_DGRAM, 0);
+    if (clientSocket == -1) {
         perror("socket creation failed");
         exit(EXIT_FAILURE);
     }
 
-    memset(&servaddr, 0, sizeof(servaddr));
+    // Configure server address
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    serverAddr.sin_port = htons(PORT);
 
-    // Server information
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // Communicate with server
+    while (1) {
+        printf("Enter message: ");
+        fgets(buffer, BUF_SIZE, stdin);
 
-    // Send message to server
-    sendto(sockfd, (const char *)message, strlen(message), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
+        // Send message to server
+        if (sendto(clientSocket, buffer, strlen(buffer), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+            perror("sendto failed");
+            break;
+        }
 
-    // Receive server response
-    n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &servaddr, &len);
-    buffer[n] = '\0';
-    printf("Server : %s\n", buffer);
+        // Receive response from server
+        if (recvfrom(clientSocket, buffer, BUF_SIZE, 0, NULL, NULL) == -1) {
+            perror("recvfrom failed");
+            break;
+        }
 
-    // Close the socket
-    close(sockfd);
+        printf("Server response: %s\n", buffer);
+    }
 
+    // Close socket
+    close(clientSocket);
+    return 0;
 }
-
-main();
