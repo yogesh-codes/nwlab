@@ -8,12 +8,17 @@
 #define PORT 8080
 #define SERVER_IP "127.0.0.1" 
 
+void create_socket(){
+    
+}
+
 int main() {
+    printf("program started");
     int tcp_client_fd;
     struct sockaddr_in server_address;
     char buffer[1024] = {0};
 
-    // Creating socket file descriptor
+    //Creating socket file descriptor
     tcp_client_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (tcp_client_fd == -1) {
         perror("socket");
@@ -31,6 +36,7 @@ int main() {
     // Connecting to the server
     if (connect(tcp_client_fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
         perror("connect");
+        printf("\nPlease check if the server is running.");
         exit(EXIT_FAILURE);
     }
 

@@ -1,0 +1,52 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build and run tcp_client",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "tcp_client.c",
+                "-o",
+                "./builds/tcp_client",
+                "&&",
+                "./builds/tcp_client"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build and run tcp_server",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "tcp_server.c",
+                "-o",
+                "./builds/tcp_server",
+                "&&",
+                "./builds/tcp_server"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": []
+        }
+    ],
+    "compounds": [
+        {
+            "label": "Build and run both programs",
+            "tasks": ["Build and run server", "Build and run client"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}
